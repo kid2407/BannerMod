@@ -1,0 +1,12 @@
+[
+  {
+    "modid": "bannermod",
+    "name": "Banner mod",
+    "description": "Get yourself banners for characters in any colors you could wish for",
+    "version": "1.0.0",
+    "mcversion": "1.12.2",
+    "authorList": [
+      "kid2407"
+    ]
+  }
+]
