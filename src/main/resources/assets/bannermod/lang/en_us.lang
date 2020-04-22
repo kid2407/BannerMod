@@ -1,1 +1,3 @@
-command.bannermod.usage=/banner
+command.bannermod.usage=/banner <word> [baseColor]
+command.bannermod.error.isconsole=/banner can only be used by a player
+command.bannermod.error.missingText=No text provided
