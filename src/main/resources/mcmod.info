@@ -2,11 +2,12 @@
   {
     "modid": "bannermod",
     "name": "Banner mod",
-    "description": "Get yourself banners for characters in any colors you could wish for",
+    "description": "Get yourself banners for characters and words in any color minecraft has to offer.",
     "version": "1.0.0",
     "mcversion": "1.12.2",
     "authorList": [
       "kid2407"
-    ]
+    ],
+    "url": "https://github.com/kid2407/BannerMod"
   }
 ]
