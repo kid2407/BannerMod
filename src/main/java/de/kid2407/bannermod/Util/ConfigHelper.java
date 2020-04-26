@@ -30,7 +30,7 @@ public class ConfigHelper {
         }
     };
 
-    @Config.Comment("Set the active Language for the mod. Possible values are en_us and de_de")
+    @Config.Comment("Set the active Language for the mod. Possible values are en_us, de_de and es_es.")
     @Config.Name("language")
     public static String activeLanguage = "en_us";
 

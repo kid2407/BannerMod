@@ -68,7 +68,27 @@ public class TranslationHelper {
         de_de.put("command.bannermod.error.unsupportedCharacter", "Nicht unterst\u00FCtzter Buchstabe \"%s\"");
         de_de.put("command.bannermod.error.unknowSpecial", "Unbekannter Special-Banner \"%s\"");
         de_de.put("bannermod.permission", "Legt fest, wer /banner benutzen kann");
-
         translations.put("de_de", de_de);
+
+        HashMap<String, String> es_es = new HashMap<>();
+        es_es.put("command.bannermod.help", "Uso: /banner help [word|special]");
+        es_es.put("command.bannermod.help.first", "Este mod es capaz de generar distintos tipos de banners. Para más información, ve a ");
+        es_es.put("command.bannermod.help.middle", " y ");
+        es_es.put("command.bannermod.help.word", "Crea banners para la palabra o caracteres dados. Los colores del texto y base son opcionales.");
+        es_es.put("command.bannermod.help.special", "Crea banners para la palabra especial dada. Los colores del texto y base son opcionales");
+        es_es.put("command.bannermod.usage", "/banner <método>");
+        es_es.put("command.bannermod.word", "Uso: /banner word <palabra> [color de texto] [color base]");
+        es_es.put("command.bannermod.special", "Uso: /banner special <nombre> [color de texto] [color base]");
+        es_es.put("command.bannermod.error.isconsole", "/banner solo puede ser utilizado por un jugador");
+        es_es.put("command.bannermod.error.missingText", "Necesitas especificar el texto a generar.");
+        es_es.put("command.bannermod.error.invalidNumberTextColor", "El color de texto tiene que ser un número de 0 a 15.");
+        es_es.put("command.bannermod.error.invalidNumberBaseColor", "El color base tiene que ser un número de 0 a 15.");
+        es_es.put("command.bannermod.textColor", "[Color de texto]");
+        es_es.put("command.bannermod.baseColor", "[Color base]");
+        es_es.put("command.bannermod.error.missingPermission", "No tienes permiso para utilizar este comando.");
+        es_es.put("command.bannermod.error.unsupportedCharacter", "Caracter no soportado: \"%s\"");
+        es_es.put("command.bannermod.error.unknowSpecial", "Banner especial desconocido: \"%s\"");
+        es_es.put("bannermod.permission", "Determina quién puede utilizar el comando /banner");
+        translations.put("es_es", es_es);
     }
 }
