@@ -16,7 +16,7 @@ public class BannerMod {
 
     public static final String MOD_ID = "bannermod";
     public static final String MOD_NAME = "Banner mod";
-    public static final String MOD_VERSION = "1.0.0";
+    public static final String MOD_VERSION = "1.0.1";
 
     public static Logger logger;
 
