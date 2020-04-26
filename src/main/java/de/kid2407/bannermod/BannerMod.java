@@ -43,6 +43,7 @@ public class BannerMod {
         serverStartingEvent.registerServerCommand(new BannerCommand());
         BannerCommand.initCharacterBanners();
         BannerCommand.initSpecialBanners();
+        BannerCommand.initColors();
         logger.info("Enabled bannermod");
     }
 }

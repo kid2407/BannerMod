@@ -10,6 +10,7 @@ import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
+import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagInt;
@@ -39,6 +40,29 @@ public class BannerCommand extends CommandBase {
     private static HashMap<String, ArrayList<HashMap<String, String>>> specialPatterns = new HashMap<>();
     private static final ArrayList<String> subcommands = new ArrayList<>(Arrays.asList("help", "word", "special"));
 
+    private static HashMap<String, Integer> colors;
+
+    public static void initColors() {
+        colors = new HashMap<>();
+
+        colors.put(TranslationHelper.translate("bannermod.color.white"), EnumDyeColor.WHITE.getDyeDamage());
+        colors.put(TranslationHelper.translate("bannermod.color.orange"), EnumDyeColor.ORANGE.getDyeDamage());
+        colors.put(TranslationHelper.translate("bannermod.color.magenta"), EnumDyeColor.MAGENTA.getDyeDamage());
+        colors.put(TranslationHelper.translate("bannermod.color.light_blue"), EnumDyeColor.LIGHT_BLUE.getDyeDamage());
+        colors.put(TranslationHelper.translate("bannermod.color.yellow"), EnumDyeColor.YELLOW.getDyeDamage());
+        colors.put(TranslationHelper.translate("bannermod.color.lime"), EnumDyeColor.LIME.getDyeDamage());
+        colors.put(TranslationHelper.translate("bannermod.color.pink"), EnumDyeColor.PINK.getDyeDamage());
+        colors.put(TranslationHelper.translate("bannermod.color.gray"), EnumDyeColor.GRAY.getDyeDamage());
+        colors.put(TranslationHelper.translate("bannermod.color.silver"), EnumDyeColor.SILVER.getDyeDamage());
+        colors.put(TranslationHelper.translate("bannermod.color.cyan"), EnumDyeColor.CYAN.getDyeDamage());
+        colors.put(TranslationHelper.translate("bannermod.color.purple"), EnumDyeColor.PURPLE.getDyeDamage());
+        colors.put(TranslationHelper.translate("bannermod.color.blue"), EnumDyeColor.BLUE.getDyeDamage());
+        colors.put(TranslationHelper.translate("bannermod.color.brown"), EnumDyeColor.BROWN.getDyeDamage());
+        colors.put(TranslationHelper.translate("bannermod.color.green"), EnumDyeColor.GREEN.getDyeDamage());
+        colors.put(TranslationHelper.translate("bannermod.color.red"), EnumDyeColor.RED.getDyeDamage());
+        colors.put(TranslationHelper.translate("bannermod.color.black"), EnumDyeColor.BLACK.getDyeDamage());
+    }
+
     @Override
     public String getName() {
         return "banner";
@@ -63,12 +87,18 @@ public class BannerCommand extends CommandBase {
                 return specialWords.keySet().stream().filter(element -> element.startsWith(args[1])).collect(Collectors.toList());
             } else if (args[0].equals("help")) {
                 return Stream.of("word", "special").filter(element -> element.startsWith(args[1])).collect(Collectors.toList());
-            } else {
-                return new ArrayList<>();
             }
         } else {
-            return new ArrayList<>();
+            if (args[0].equals("special") || args[0].equals("word")) {
+                if (args.length == 3) {
+                    return colors.keySet().stream().filter(element -> element.toLowerCase().startsWith(args[2])).collect(Collectors.toList());
+                } else if (args.length == 4) {
+                    return colors.keySet().stream().filter(element -> element.toLowerCase().startsWith(args[3])).collect(Collectors.toList());
+                }
+            }
         }
+
+        return new ArrayList<>();
     }
 
     @Override
@@ -153,11 +183,18 @@ public class BannerCommand extends CommandBase {
 
                 if (args.length > 2) {
                     try {
-                        textColor = Integer.parseInt(args[2]);
-                        if (textColor < 0 || textColor > 15) {
-                            throw new NumberFormatException();
+                        if (colors.containsKey(args[2])) {
+                            textColor = colors.get(args[2]);
+                        } else if (!args[2].matches("^\\d+$")) {
+                            CommandHelper.sendMessageToCommandSender(player, TranslationHelper.translate("command.bannermod.error.unknownColor", args[2]), TextFormatting.YELLOW);
+                            return;
+                        } else {
+                            textColor = Integer.parseInt(args[2]);
+                            if (textColor < 0 || textColor > 15) {
+                                throw new NumberFormatException();
+                            }
+                            textColor = 15 - textColor;
                         }
-                        textColor = 15 - textColor;
                     } catch (NumberFormatException numberFormatException) {
                         CommandHelper.sendMessageToCommandSender(player, TranslationHelper.translate("command.bannermod.error.invalidNumberTextColor"), TextFormatting.YELLOW);
                         return;
@@ -166,11 +203,18 @@ public class BannerCommand extends CommandBase {
 
                 if (args.length > 3) {
                     try {
-                        baseColor = Integer.parseInt(args[3]);
-                        if (baseColor < 0 || baseColor > 15) {
-                            throw new NumberFormatException();
+                        if (colors.containsKey(args[3])) {
+                            baseColor = colors.get(args[3]);
+                        } else if (!args[3].matches("^\\d+$")) {
+                            CommandHelper.sendMessageToCommandSender(player, TranslationHelper.translate("command.bannermod.error.unknownColor", args[3]), TextFormatting.YELLOW);
+                            return;
+                        } else {
+                            baseColor = Integer.parseInt(args[3]);
+                            if (baseColor < 0 || baseColor > 15) {
+                                throw new NumberFormatException();
+                            }
+                            baseColor = 15 - baseColor;
                         }
-                        baseColor = 15 - baseColor;
                     } catch (NumberFormatException numberFormatException) {
                         CommandHelper.sendMessageToCommandSender(player, TranslationHelper.translate("command.bannermod.error.invalidNumberBaseColor"), TextFormatting.YELLOW);
                         return;
