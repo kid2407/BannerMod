@@ -1,4 +1,4 @@
-package de.kid2407.bannermod.Util;
+package de.kid2407.bannermod.util;
 
 import net.minecraft.command.ICommandSender;
 import net.minecraft.util.text.Style;

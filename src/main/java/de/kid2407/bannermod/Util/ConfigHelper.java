@@ -1,4 +1,4 @@
-package de.kid2407.bannermod.Util;
+package de.kid2407.bannermod.util;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -62,20 +62,4 @@ public class ConfigHelper {
             }
         }
     }
-
-    public enum CONFIG_TYPES {
-        CHARACTERS(BannerMod.charactersFilename),
-        SPECIAL(BannerMod.specialsFilename);
-
-        private final String filename;
-
-        CONFIG_TYPES(String filename) {
-            this.filename = filename;
-        }
-
-        public String getFilename() {
-            return filename;
-        }
-    }
-
 }

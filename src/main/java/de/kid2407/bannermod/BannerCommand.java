@@ -1,8 +1,9 @@
 package de.kid2407.bannermod;
 
-import de.kid2407.bannermod.Util.CommandHelper;
-import de.kid2407.bannermod.Util.ConfigHelper;
-import de.kid2407.bannermod.Util.TranslationHelper;
+import de.kid2407.bannermod.util.CONFIG_TYPES;
+import de.kid2407.bannermod.util.CommandHelper;
+import de.kid2407.bannermod.util.ConfigHelper;
+import de.kid2407.bannermod.util.TranslationHelper;
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
@@ -15,6 +16,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagInt;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.NBTTagString;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
@@ -22,7 +24,6 @@ import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.event.ClickEvent;
-import net.minecraftforge.server.permission.PermissionAPI;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -35,7 +36,7 @@ import java.util.stream.Stream;
 
 @MethodsReturnNonnullByDefault
 public class BannerCommand extends CommandBase {
-    private static final ArrayList<String> flippedCharacters = new ArrayList<>(Arrays.asList("H", "Q", "S"));
+    public static final ArrayList<String> flippedCharacters = new ArrayList<>(Arrays.asList("H", "Q", "S"));
     private static HashMap<String, ArrayList<HashMap<String, String>>> characterPatterns = new HashMap<>();
     private static HashMap<String, ArrayList<HashMap<String, String>>> specialPatterns = new HashMap<>();
     private static final ArrayList<String> subcommands = new ArrayList<>(Arrays.asList("help", "word", "special"));
@@ -83,7 +84,7 @@ public class BannerCommand extends CommandBase {
             return subcommands.stream().filter(element -> element.startsWith(args[0])).collect(Collectors.toList());
         } else if (args.length == 2) {
             if (args[0].equals("special")) {
-                HashMap<String, ArrayList<HashMap<String, String>>> specialWords = ConfigHelper.getConfig(ConfigHelper.CONFIG_TYPES.SPECIAL);
+                HashMap<String, ArrayList<HashMap<String, String>>> specialWords = ConfigHelper.getConfig(CONFIG_TYPES.SPECIAL);
                 return specialWords.keySet().stream().filter(element -> element.startsWith(args[1])).collect(Collectors.toList());
             } else if (args[0].equals("help")) {
                 return Stream.of("word", "special").filter(element -> element.startsWith(args[1])).collect(Collectors.toList());
@@ -111,16 +112,11 @@ public class BannerCommand extends CommandBase {
 
         EntityPlayer player = (EntityPlayer) sender;
 
-        if (!PermissionAPI.hasPermission(player, "bannermod.use")) {
-            CommandHelper.sendMessageToCommandSender(player, TranslationHelper.translate("command.bannermod.error.missingPermission"), TextFormatting.RED);
-            return;
-        }
-
         if (args.length == 0) {
             throw new WrongUsageException(TranslationHelper.translate("command.bannermod.usage"));
         } else {
             String subcommand = args[0];
-            ConfigHelper.CONFIG_TYPES bannerType;
+            CONFIG_TYPES bannerType;
 
             switch (subcommand) {
                 case "help":
@@ -159,10 +155,10 @@ public class BannerCommand extends CommandBase {
                     }
                     return;
                 case "word":
-                    bannerType = ConfigHelper.CONFIG_TYPES.CHARACTERS;
+                    bannerType = CONFIG_TYPES.CHARACTERS;
                     break;
                 case "special":
-                    bannerType = ConfigHelper.CONFIG_TYPES.SPECIAL;
+                    bannerType = CONFIG_TYPES.SPECIAL;
                     break;
                 default:
                     CommandHelper.sendMessageToCommandSender(player, TranslationHelper.translate("command.bannermod.usage"), TextFormatting.RED);
@@ -221,7 +217,7 @@ public class BannerCommand extends CommandBase {
                     }
                 }
 
-                if (bannerType == ConfigHelper.CONFIG_TYPES.CHARACTERS) {
+                if (bannerType == CONFIG_TYPES.CHARACTERS) {
                     String[] uniqueCharacters = Arrays.stream(word.toUpperCase().split("")).distinct().toArray(String[]::new);
                     int tmpTextColor;
                     int tmpBaseColor;
@@ -244,7 +240,7 @@ public class BannerCommand extends CommandBase {
                     }
                 }
 
-                if (bannerType == ConfigHelper.CONFIG_TYPES.SPECIAL) {
+                if (bannerType == CONFIG_TYPES.SPECIAL) {
                     if (specialPatterns.containsKey(word)) {
                         banner = new ItemStack(Items.BANNER, 1, baseColor);
                         banner.setTagCompound(generateBannerCompoundForSpecial(word, textColor, baseColor));
@@ -257,40 +253,56 @@ public class BannerCommand extends CommandBase {
         }
     }
 
-    private NBTTagCompound generateBannerCompoundForCharacter(String character, int textColor, int baseColor) {
-        return generateBannerCompound(character, ConfigHelper.CONFIG_TYPES.CHARACTERS, textColor, baseColor);
+    public static NBTTagCompound generateBannerCompoundForCharacter(String character, int textColor, int baseColor) {
+        if (characterPatterns.isEmpty()) {
+            initCharacterBanners();
+        }
+        return generateBannerCompound(character, CONFIG_TYPES.CHARACTERS, textColor, baseColor);
     }
 
-    private NBTTagCompound generateBannerCompoundForSpecial(String character, int textColor, int baseColor) {
-        return generateBannerCompound(character, ConfigHelper.CONFIG_TYPES.SPECIAL, textColor, baseColor);
+    private static NBTTagCompound generateBannerCompoundForSpecial(String character, int textColor, int baseColor) {
+        if (specialPatterns.isEmpty()) {
+            initSpecialBanners();
+        }
+        return generateBannerCompound(character, CONFIG_TYPES.SPECIAL, textColor, baseColor);
     }
 
-    private NBTTagCompound generateBannerCompound(String element, ConfigHelper.CONFIG_TYPES bannerType, int textColor, int baseColor) {
+    private static NBTTagCompound generateBannerCompound(String element, CONFIG_TYPES bannerType, int textColor, int baseColor) {
         NBTTagCompound compound = new NBTTagCompound();
         NBTTagCompound blockDataNBT = new NBTTagCompound();
+        NBTTagCompound nameNBT = new NBTTagCompound();
+        String itemName;
 
-        blockDataNBT.setTag("Base", new NBTTagInt(textColor));
-
-        if (bannerType == ConfigHelper.CONFIG_TYPES.CHARACTERS) {
+        if (bannerType == CONFIG_TYPES.CHARACTERS) {
             blockDataNBT.setTag("Patterns", generatePatternCompoundForCharacter(element, textColor, baseColor));
+            if (element.matches("\\d")) {
+                itemName = TranslationHelper.translate("bannermod.gui.name.number", element);
+            } else {
+                itemName = TranslationHelper.translate("bannermod.gui.name.letter", element);
+            }
         } else {
             blockDataNBT.setTag("Patterns", generatePatternCompoundForSpecial(element, textColor, baseColor));
+            itemName = TranslationHelper.translate("bannermod.gui.name.special", element);
         }
 
+        blockDataNBT.setTag("Base", new NBTTagInt(textColor));
         compound.setTag("BlockEntityTag", blockDataNBT);
+
+        nameNBT.setTag("Name", new NBTTagString(itemName));
+        compound.setTag("display", nameNBT);
 
         return compound;
     }
 
-    private NBTTagList generatePatternCompoundForCharacter(String character, int textColor, int baseColor) {
+    private static NBTTagList generatePatternCompoundForCharacter(String character, int textColor, int baseColor) {
         return generatePatternCompound(characterPatterns.get(character), textColor, baseColor);
     }
 
-    private NBTTagList generatePatternCompoundForSpecial(String word, int textColor, int baseColor) {
+    private static NBTTagList generatePatternCompoundForSpecial(String word, int textColor, int baseColor) {
         return generatePatternCompound(specialPatterns.get(word), textColor, baseColor);
     }
 
-    private NBTTagList generatePatternCompound(ArrayList<HashMap<String, String>> element, int textColor, int baseColor) {
+    private static NBTTagList generatePatternCompound(ArrayList<HashMap<String, String>> element, int textColor, int baseColor) {
         NBTTagList layers = new NBTTagList();
         NBTTagCompound singlePattern;
 
@@ -305,7 +317,7 @@ public class BannerCommand extends CommandBase {
     }
 
     public static void initCharacterBanners() {
-        HashMap<String, ArrayList<HashMap<String, String>>> characters = ConfigHelper.getConfig(ConfigHelper.CONFIG_TYPES.CHARACTERS);
+        HashMap<String, ArrayList<HashMap<String, String>>> characters = ConfigHelper.getConfig(CONFIG_TYPES.CHARACTERS);
         if (!characters.isEmpty()) {
             characterPatterns = characters;
             BannerMod.logger.info("Characters erfolreich geladen.");
@@ -315,7 +327,7 @@ public class BannerCommand extends CommandBase {
     }
 
     public static void initSpecialBanners() {
-        HashMap<String, ArrayList<HashMap<String, String>>> specialWords = ConfigHelper.getConfig(ConfigHelper.CONFIG_TYPES.SPECIAL);
+        HashMap<String, ArrayList<HashMap<String, String>>> specialWords = ConfigHelper.getConfig(CONFIG_TYPES.SPECIAL);
         if (!specialWords.isEmpty()) {
             specialPatterns = specialWords;
             BannerMod.logger.info("Specials erfolreich geladen.");

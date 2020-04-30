@@ -1,4 +1,4 @@
-package de.kid2407.bannermod.Util;
+package de.kid2407.bannermod.util;
 
 import java.util.HashMap;
 
@@ -31,7 +31,7 @@ public class TranslationHelper {
 
     private static void init() {
         HashMap<String, String> en_us = new HashMap<>();
-        
+
         en_us.put("command.bannermod.help", "Usage: /banner help [word|special]");
         en_us.put("command.bannermod.help.first", "This mod provides generation for different types of banners. For more information, see ");
         en_us.put("command.bannermod.help.middle", " and ");
@@ -47,10 +47,15 @@ public class TranslationHelper {
         en_us.put("command.bannermod.error.unknownColor", "Unknown color \"%s\"");
         en_us.put("command.bannermod.textColor", "[Text color]");
         en_us.put("command.bannermod.baseColor", "[Base color]");
-        en_us.put("command.bannermod.error.missingPermission", "You do not have permission to use this command!");
         en_us.put("command.bannermod.error.unsupportedCharacter", "Unsupported character \"%s\"");
         en_us.put("command.bannermod.error.unknowSpecial", "Unknown special banner \"%s\"");
         en_us.put("bannermod.permission", "Determines who can use the /banner command");
+
+        en_us.put("bannermod.gui.changeTextColor", "Change text color");
+        en_us.put("bannermod.gui.changeBaseColor", "Change base color");
+        en_us.put("bannermod.gui.name.letter", "Letter \"%s\"");
+        en_us.put("bannermod.gui.name.special", "Special: \"%s\"");
+        en_us.put("bannermod.gui.name.number", "Number: \"%s\"");
 
         en_us.put("bannermod.color.white", "white");
         en_us.put("bannermod.color.orange", "orange");
@@ -68,12 +73,12 @@ public class TranslationHelper {
         en_us.put("bannermod.color.green", "green");
         en_us.put("bannermod.color.red", "red");
         en_us.put("bannermod.color.black", "black");
-        
+
         translations.put("en_us", en_us);
 
-        
+
         HashMap<String, String> de_de = new HashMap<>();
-        
+
         de_de.put("command.bannermod.help", "Syntax: /banner help [word|special]");
         de_de.put("command.bannermod.help.first", "Dieser Mod dient zum Erzeugen verschiedenster Banner. F\u00FCr mehr Details verwende ");
         de_de.put("command.bannermod.help.middle", " und ");
@@ -89,10 +94,15 @@ public class TranslationHelper {
         de_de.put("command.bannermod.error.unknownColor", "Unbekannte Farbe \"%s\"");
         de_de.put("command.bannermod.textColor", "[Textfarbe]");
         de_de.put("command.bannermod.baseColor", "[Grundfarbe]");
-        de_de.put("command.bannermod.error.missingPermission", "Du hast nicht die ben\u00F6tige Berechtigung, diesen Befehl auszuf\u00FChren");
         de_de.put("command.bannermod.error.unsupportedCharacter", "Nicht unterst\u00FCtzter Buchstabe \"%s\"");
         de_de.put("command.bannermod.error.unknowSpecial", "Unbekannter Special-Banner \"%s\"");
         de_de.put("bannermod.permission", "Legt fest, wer /banner benutzen kann");
+
+        de_de.put("bannermod.gui.changeTextColor", "Textfarbe \u00E4ndern");
+        de_de.put("bannermod.gui.changeBaseColor", "Grundfarbe \u00E4ndern");
+        de_de.put("bannermod.gui.name.letter", "Buchstabe \"%s\"");
+        de_de.put("bannermod.gui.name.special", "Spezial: \"%s\"");
+        de_de.put("bannermod.gui.name.number", "Zahl: \"%s\"");
 
         de_de.put("bannermod.color.white", "Wei\u00DF");
         de_de.put("bannermod.color.orange", "Orange");
@@ -110,12 +120,12 @@ public class TranslationHelper {
         de_de.put("bannermod.color.green", "Gr\u00FCn");
         de_de.put("bannermod.color.red", "Rot");
         de_de.put("bannermod.color.black", "Schwarz");
-        
+
         translations.put("de_de", de_de);
 
-        
+
         HashMap<String, String> es_es = new HashMap<>();
-        
+
         es_es.put("command.bannermod.help", "Uso: /banner help [word|special]");
         es_es.put("command.bannermod.help.first", "Este mod es capaz de generar distintos tipos de banners. Para m\u00E1s informaci\u00F3n, ve a ");
         es_es.put("command.bannermod.help.middle", " y ");
@@ -130,11 +140,10 @@ public class TranslationHelper {
         es_es.put("command.bannermod.error.invalidNumberBaseColor", "El color base tiene que ser un n\u00FAmero de 0 a 15.");
         es_es.put("command.bannermod.textColor", "[Color de texto]");
         es_es.put("command.bannermod.baseColor", "[Color base]");
-        es_es.put("command.bannermod.error.missingPermission", "No tienes permiso para utilizar este comando.");
         es_es.put("command.bannermod.error.unsupportedCharacter", "Caracter no soportado: \"%s\"");
         es_es.put("command.bannermod.error.unknowSpecial", "Banner especial desconocido: \"%s\"");
         es_es.put("bannermod.permission", "Determina qui\u00E9n puede utilizar el comando /banner");
-        
+
         translations.put("es_es", es_es);
     }
 }
