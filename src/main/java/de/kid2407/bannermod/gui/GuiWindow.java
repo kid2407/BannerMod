@@ -1,13 +1,13 @@
 package de.kid2407.bannermod.gui;
 
 import de.kid2407.bannermod.BannerMod;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.ClickType;
 import net.minecraft.inventory.Slot;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
-import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
 import java.io.IOException;
@@ -22,12 +22,14 @@ public class GuiWindow extends GuiContainer {
     private final World world;
     private final int x, y, z;
     private final EntityPlayer entity;
+    private final GuiContainerMod guiContainerMod;
 
     private final int guiWidth = 176;
     private final int guiHeight = 156;
 
-    public GuiWindow(World world, int x, int y, int z, EntityPlayer entity) {
-        super(new GuiContainerMod(world, x, y, z, entity));
+    public GuiWindow(World world, int x, int y, int z, EntityPlayer entity, GuiContainerMod guiContainerMod) {
+        super(guiContainerMod);
+        this.guiContainerMod = guiContainerMod;
         this.world = world;
         this.x = x;
         this.y = y;
@@ -62,21 +64,8 @@ public class GuiWindow extends GuiContainer {
     }
 
     @Override
-    public void onGuiClosed() {
-        super.onGuiClosed();
-        Keyboard.enableRepeatEvents(false);
-    }
-
-    @Override
-    public void initGui() {
-        super.initGui();
-        Keyboard.enableRepeatEvents(true);
-        this.buttonList.clear();
-    }
-
-    @Override
     protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
-        if (mouseX < 0 || mouseX > guiWidth || mouseY < 0 || mouseY > guiHeight) {
+        if (mouseX < getGuiLeft() || mouseX > getGuiLeft() + guiWidth || mouseY < getGuiTop() || mouseY > getGuiTop() + guiHeight) {
             return;
         }
         super.mouseClicked(mouseX, mouseY, mouseButton);
@@ -85,13 +74,37 @@ public class GuiWindow extends GuiContainer {
     @Override
     protected void handleMouseClick(Slot slotIn, int slotId, int mouseButton, ClickType type) {
         if (slotIn != null) {
-            BannerMod.logger.info("Geklickter index: " + slotIn.getSlotIndex());
-            BannerMod.logger.info("Geklickter id: " + slotId);
+            BannerModInventoryTypes inventoryType = guiContainerMod.getCurrentInventoryType();
+            if (inventoryType == BannerModInventoryTypes.DEFAULT) {
+                if (slotId == GuiContainerMod.textColorSlot) {
+                    guiContainerMod.loadInventory(BannerModInventoryTypes.TEXT_COLOR);
+                } else if (slotId == GuiContainerMod.baseColorSlot) {
+                    guiContainerMod.loadInventory(BannerModInventoryTypes.BASE_COLOR);
+                } else if (slotId < 36) {
+                    guiContainerMod.giveBannerToPlayer(slotId);
+                }
+            } else if (inventoryType == BannerModInventoryTypes.TEXT_COLOR || inventoryType == BannerModInventoryTypes.BASE_COLOR) {
+                if (slotId < 16) {
+                    if (inventoryType == BannerModInventoryTypes.TEXT_COLOR) {
+                        guiContainerMod.setTextColorForPlayer(slotIn.getStack().getMetadata());
+                    } else {
+                        guiContainerMod.setBaseColorForPlayer(slotIn.getStack().getMetadata());
+                    }
+                }
+            } else {
+                BannerMod.logger.error("Unknown InventoryType");
+            }
         } else {
-            BannerMod.logger.info("Kein slot da!");
+            BannerMod.logger.info("Slot is null");
         }
         super.handleMouseClick(slotIn, slotId, mouseButton, type);
     }
 
-
+    @Override
+    protected void keyTyped(char typedChar, int keyCode) throws IOException {
+        if (keyCode == Minecraft.getMinecraft().gameSettings.keyBindDrop.getKeyCode()) {
+            return;
+        }
+        super.keyTyped(typedChar, keyCode);
+    }
 }

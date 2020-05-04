@@ -41,6 +41,7 @@ public class GuiCommand extends CommandBase {
     }
 
     @Override
+    @ParametersAreNonnullByDefault
     public boolean checkPermission(MinecraftServer server, ICommandSender sender) {
         return true;
     }

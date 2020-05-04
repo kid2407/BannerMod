@@ -41,27 +41,41 @@ public class BannerCommand extends CommandBase {
     private static HashMap<String, ArrayList<HashMap<String, String>>> specialPatterns = new HashMap<>();
     private static final ArrayList<String> subcommands = new ArrayList<>(Arrays.asList("help", "word", "special"));
 
-    private static HashMap<String, Integer> colors;
+    private static final HashMap<String, EnumDyeColor> colors = new HashMap<>();
+    private static final HashMap<EnumDyeColor, String> reversedColors = new HashMap<>();
 
     public static void initColors() {
-        colors = new HashMap<>();
+        colors.put(TranslationHelper.translate("bannermod.color.white"), EnumDyeColor.WHITE);
+        colors.put(TranslationHelper.translate("bannermod.color.orange"), EnumDyeColor.ORANGE);
+        colors.put(TranslationHelper.translate("bannermod.color.magenta"), EnumDyeColor.MAGENTA);
+        colors.put(TranslationHelper.translate("bannermod.color.light_blue"), EnumDyeColor.LIGHT_BLUE);
+        colors.put(TranslationHelper.translate("bannermod.color.yellow"), EnumDyeColor.YELLOW);
+        colors.put(TranslationHelper.translate("bannermod.color.lime"), EnumDyeColor.LIME);
+        colors.put(TranslationHelper.translate("bannermod.color.pink"), EnumDyeColor.PINK);
+        colors.put(TranslationHelper.translate("bannermod.color.gray"), EnumDyeColor.GRAY);
+        colors.put(TranslationHelper.translate("bannermod.color.silver"), EnumDyeColor.SILVER);
+        colors.put(TranslationHelper.translate("bannermod.color.cyan"), EnumDyeColor.CYAN);
+        colors.put(TranslationHelper.translate("bannermod.color.purple"), EnumDyeColor.PURPLE);
+        colors.put(TranslationHelper.translate("bannermod.color.blue"), EnumDyeColor.BLUE);
+        colors.put(TranslationHelper.translate("bannermod.color.brown"), EnumDyeColor.BROWN);
+        colors.put(TranslationHelper.translate("bannermod.color.green"), EnumDyeColor.GREEN);
+        colors.put(TranslationHelper.translate("bannermod.color.red"), EnumDyeColor.RED);
+        colors.put(TranslationHelper.translate("bannermod.color.black"), EnumDyeColor.BLACK);
 
-        colors.put(TranslationHelper.translate("bannermod.color.white"), EnumDyeColor.WHITE.getDyeDamage());
-        colors.put(TranslationHelper.translate("bannermod.color.orange"), EnumDyeColor.ORANGE.getDyeDamage());
-        colors.put(TranslationHelper.translate("bannermod.color.magenta"), EnumDyeColor.MAGENTA.getDyeDamage());
-        colors.put(TranslationHelper.translate("bannermod.color.light_blue"), EnumDyeColor.LIGHT_BLUE.getDyeDamage());
-        colors.put(TranslationHelper.translate("bannermod.color.yellow"), EnumDyeColor.YELLOW.getDyeDamage());
-        colors.put(TranslationHelper.translate("bannermod.color.lime"), EnumDyeColor.LIME.getDyeDamage());
-        colors.put(TranslationHelper.translate("bannermod.color.pink"), EnumDyeColor.PINK.getDyeDamage());
-        colors.put(TranslationHelper.translate("bannermod.color.gray"), EnumDyeColor.GRAY.getDyeDamage());
-        colors.put(TranslationHelper.translate("bannermod.color.silver"), EnumDyeColor.SILVER.getDyeDamage());
-        colors.put(TranslationHelper.translate("bannermod.color.cyan"), EnumDyeColor.CYAN.getDyeDamage());
-        colors.put(TranslationHelper.translate("bannermod.color.purple"), EnumDyeColor.PURPLE.getDyeDamage());
-        colors.put(TranslationHelper.translate("bannermod.color.blue"), EnumDyeColor.BLUE.getDyeDamage());
-        colors.put(TranslationHelper.translate("bannermod.color.brown"), EnumDyeColor.BROWN.getDyeDamage());
-        colors.put(TranslationHelper.translate("bannermod.color.green"), EnumDyeColor.GREEN.getDyeDamage());
-        colors.put(TranslationHelper.translate("bannermod.color.red"), EnumDyeColor.RED.getDyeDamage());
-        colors.put(TranslationHelper.translate("bannermod.color.black"), EnumDyeColor.BLACK.getDyeDamage());
+        for (String color : colors.keySet()) {
+            reversedColors.put(colors.get(color), color);
+        }
+    }
+
+    public static String getColorName(EnumDyeColor color) {
+        if (colors.isEmpty()) {
+            initColors();
+        }
+        if (reversedColors.containsKey(color)) {
+            return reversedColors.get(color);
+        }
+
+        return reversedColors.get(EnumDyeColor.WHITE);
     }
 
     @Override
@@ -180,7 +194,7 @@ public class BannerCommand extends CommandBase {
                 if (args.length > 2) {
                     try {
                         if (colors.containsKey(args[2])) {
-                            textColor = colors.get(args[2]);
+                            textColor = colors.get(args[2]).getDyeDamage();
                         } else if (!args[2].matches("^\\d+$")) {
                             CommandHelper.sendMessageToCommandSender(player, TranslationHelper.translate("command.bannermod.error.unknownColor", args[2]), TextFormatting.YELLOW);
                             return;
@@ -200,7 +214,7 @@ public class BannerCommand extends CommandBase {
                 if (args.length > 3) {
                     try {
                         if (colors.containsKey(args[3])) {
-                            baseColor = colors.get(args[3]);
+                            baseColor = colors.get(args[3]).getDyeDamage();
                         } else if (!args[3].matches("^\\d+$")) {
                             CommandHelper.sendMessageToCommandSender(player, TranslationHelper.translate("command.bannermod.error.unknownColor", args[3]), TextFormatting.YELLOW);
                             return;

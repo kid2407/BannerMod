@@ -46,7 +46,6 @@ public class BannerMod {
         logger.info("Registering commands");
         serverStartingEvent.registerServerCommand(new BannerCommand());
         serverStartingEvent.registerServerCommand(new GuiCommand());
-        BannerCommand.initColors();
         logger.info("Enabled bannermod");
     }
 }

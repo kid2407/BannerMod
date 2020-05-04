@@ -6,18 +6,19 @@ import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
-import net.minecraft.inventory.*;
+import net.minecraft.inventory.Container;
+import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.InventoryBasic;
+import net.minecraft.inventory.Slot;
+import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagString;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Supplier;
+import java.util.UUID;
 
 /**
  * User: Tobias Franz
@@ -25,29 +26,26 @@ import java.util.function.Supplier;
  * Time: 17:38
  */
 @MethodsReturnNonnullByDefault
-public class GuiContainerMod extends Container implements Supplier<Map<Integer, Slot>> {
+public class GuiContainerMod extends Container {
 
-    private IInventory internalInventory;
-    private final World world;
+    private final IInventory internalInventory;
     private final EntityPlayer entityPlayer;
-    private final int x, y, z;
-    private final Map<Integer, Slot> customSlots = new HashMap<>();
+
+    public static final int textColorSlot = 48;
+    public static final int baseColorSlot = 50;
+
+    private static final HashMap<UUID, Integer> textColorPerPlayer = new HashMap<>();
+    private static final HashMap<UUID, Integer> baseColorPerPlayer = new HashMap<>();
+
+    private BannerModInventoryTypes currentInventoryType = BannerModInventoryTypes.DEFAULT;
 
     public GuiContainerMod(World world, int x, int y, int z, EntityPlayer player) {
-        this.world = world;
         this.entityPlayer = player;
-        this.x = x;
-        this.y = y;
-        this.z = z;
-        this.internalInventory = new InventoryBasic("BannerGui", true, 54 + 9);
-        TileEntity entity = world.getTileEntity(new BlockPos(x, y, z));
-        if (entity instanceof IInventory) {
-            this.internalInventory = (IInventory) entity;
-        }
+        this.internalInventory = new InventoryBasic("BannerGui", true, 54);
 
         for (int i = 0; i < 6; i++) {
             for (int j = 0; j < 9; j++) {
-                addSlotToContainer(new Slot(this.internalInventory, j + i * 9 + 9, 8 + j * 18, 22 + i * 18) {
+                addSlotToContainer(new Slot(this.internalInventory, j + i * 9, 8 + j * 18, 22 + i * 18) {
                     @Override
                     @ParametersAreNonnullByDefault
                     public boolean canTakeStack(EntityPlayer playerIn) {
@@ -57,15 +55,58 @@ public class GuiContainerMod extends Container implements Supplier<Map<Integer, 
             }
         }
 
-        loadDefaultInventory();
+        textColorPerPlayer.putIfAbsent(entityPlayer.getUniqueID(), 0);
+        baseColorPerPlayer.putIfAbsent(entityPlayer.getUniqueID(), 15);
+
+        generateDefaultInventory();
     }
 
-    private void loadDefaultInventory() {
-        internalInventory.clear();
-        int baseColor = 15;
-        int textColor = 0;
-        int tmpBaseColor;
+    private ItemStack getColorSelector(String name, int color) {
+        NBTTagCompound compound = new NBTTagCompound();
+        NBTTagCompound nameTag = new NBTTagCompound();
+
+        nameTag.setTag("Name", new NBTTagString(name));
+        compound.setTag("display", nameTag);
+
+        ItemStack itemStack = new ItemStack(Blocks.WOOL, 1, color);
+        itemStack.setTagCompound(compound);
+
+        return itemStack;
+    }
+
+    public void setTextColorForPlayer(int color) {
+        textColorPerPlayer.put(entityPlayer.getUniqueID(), color);
+    }
+
+    public void setBaseColorForPlayer(int color) {
+        baseColorPerPlayer.put(entityPlayer.getUniqueID(), color);
+    }
+
+    public BannerModInventoryTypes getCurrentInventoryType() {
+        return currentInventoryType;
+    }
+
+    public void loadInventory(BannerModInventoryTypes type) {
+        switch (type) {
+            case DEFAULT:
+                generateDefaultInventory();
+                break;
+            case TEXT_COLOR:
+                generateTextColorInventory();
+                break;
+            case BASE_COLOR:
+                generateBaseColorInventory();
+                break;
+        }
+    }
+
+    private void generateDefaultInventory() {
+//        internalInventory.clear();
+        UUID uuid = entityPlayer.getUniqueID();
+        int textColor = textColorPerPlayer.get(uuid);
+        int baseColor = baseColorPerPlayer.get(uuid);
         int tmpTextColor;
+        int tmpBaseColor;
 
         String[] characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890".split("");
         for (int i = 0; i < characters.length; i++) {
@@ -79,31 +120,42 @@ public class GuiContainerMod extends Container implements Supplier<Map<Integer, 
             }
             ItemStack banner = new ItemStack(Items.BANNER, 1, tmpBaseColor);
             banner.setTagCompound(BannerCommand.generateBannerCompoundForCharacter(character, tmpTextColor, tmpBaseColor));
-            internalInventory.setInventorySlotContents(i + 9, banner);
+            internalInventory.setInventorySlotContents(i, banner);
         }
 
         ItemStack textColorStack = getColorSelector(TranslationHelper.translate("bannermod.gui.changeTextColor"), textColor);
-        internalInventory.setInventorySlotContents(57, textColorStack);
+        internalInventory.setInventorySlotContents(textColorSlot, textColorStack);
 
         ItemStack baseColorStack = getColorSelector(TranslationHelper.translate("bannermod.gui.changeBaseColor"), baseColor);
-        internalInventory.setInventorySlotContents(59, baseColorStack);
+        internalInventory.setInventorySlotContents(baseColorSlot, baseColorStack);
+
+        internalInventory.markDirty();
+
+        currentInventoryType = BannerModInventoryTypes.DEFAULT;
     }
 
-    private ItemStack getColorSelector(String name, int color) {
-        NBTTagCompound ntc = new NBTTagCompound();
-        NBTTagCompound bet = new NBTTagCompound();
+    private void generateTextColorInventory() {
+//        internalInventory.clear();
 
-        bet.setTag("Name", new NBTTagString(name));
-        ntc.setTag("display", bet);
+        for (int i = 0; i < 16; i++) {
+            internalInventory.setInventorySlotContents(i, getColorSelector(BannerCommand.getColorName(EnumDyeColor.byDyeDamage(i)), i));
+        }
 
-        ItemStack itemStack = new ItemStack(Blocks.WOOL, 1, color);
-        itemStack.setTagCompound(ntc);
-
-        return itemStack;
+        currentInventoryType = BannerModInventoryTypes.TEXT_COLOR;
     }
 
-    public Map<Integer, Slot> get() {
-        return customSlots;
+    private void generateBaseColorInventory() {
+//        internalInventory.clear();
+
+        for (int i = 0; i < 16; i++) {
+            internalInventory.setInventorySlotContents(i, getColorSelector(BannerCommand.getColorName(EnumDyeColor.byDyeDamage(i)), i));
+        }
+
+        currentInventoryType = BannerModInventoryTypes.BASE_COLOR;
+    }
+
+    public void giveBannerToPlayer(int slotId) {
+        entityPlayer.addItemStackToInventory(internalInventory.getStackInSlot(slotId).copy());
     }
 
     @Override
@@ -114,130 +166,7 @@ public class GuiContainerMod extends Container implements Supplier<Map<Integer, 
 
     @Override
     @ParametersAreNonnullByDefault
-    public ItemStack transferStackInSlot(EntityPlayer playerIn, int index) {
-        ItemStack itemstack = ItemStack.EMPTY;
-        Slot slot = this.inventorySlots.get(index);
-        if (slot != null && slot.getHasStack()) {
-            ItemStack itemstack1 = slot.getStack();
-            itemstack = itemstack1.copy();
-            if (!this.mergeItemStack(itemstack1, 0, 0, false)) {
-                if (index < 27) {
-                    if (!this.mergeItemStack(itemstack1, 27, this.inventorySlots.size(), true)) {
-                        return ItemStack.EMPTY;
-                    }
-                } else {
-                    if (!this.mergeItemStack(itemstack1, 0, 27, false)) {
-                        return ItemStack.EMPTY;
-                    }
-                }
-                return ItemStack.EMPTY;
-            }
-            if (itemstack1.getCount() == 0) {
-                slot.putStack(ItemStack.EMPTY);
-            } else {
-                slot.onSlotChanged();
-            }
-            if (itemstack1.getCount() == itemstack.getCount()) {
-                return ItemStack.EMPTY;
-            }
-            slot.onTake(playerIn, itemstack1);
-        }
-        return itemstack;
-    }
-
-    /**
-     * Merges provided ItemStack with the first avaliable one in the
-     * container/player inventor between minIndex (included) and maxIndex
-     * (excluded). Args : stack, minIndex, maxIndex, negativDirection. /!\ the
-     * Container implementation do not check if the item is valid for the slot
-     */
-    @Override
-    @ParametersAreNonnullByDefault
-    protected boolean mergeItemStack(ItemStack stack, int startIndex, int endIndex, boolean reverseDirection) {
-        boolean flag = false;
-        int i = startIndex;
-        if (reverseDirection) {
-            i = endIndex - 1;
-        }
-        if (stack.isStackable()) {
-            while (!stack.isEmpty()) {
-                if (reverseDirection) {
-                    if (i < startIndex) {
-                        break;
-                    }
-                } else if (i >= endIndex) {
-                    break;
-                }
-                Slot slot = this.inventorySlots.get(i);
-                ItemStack itemstack = slot.getStack();
-                if (slot.isItemValid(itemstack) && !itemstack.isEmpty() && itemstack.getItem() == stack.getItem()
-                        && (!stack.getHasSubtypes() || stack.getMetadata() == itemstack.getMetadata())
-                        && ItemStack.areItemStackTagsEqual(stack, itemstack)) {
-                    int j = itemstack.getCount() + stack.getCount();
-                    int maxSize = Math.min(slot.getSlotStackLimit(), stack.getMaxStackSize());
-                    if (j <= maxSize) {
-                        stack.setCount(0);
-                        itemstack.setCount(j);
-                        slot.putStack(itemstack);
-                        flag = true;
-                    } else if (itemstack.getCount() < maxSize) {
-                        stack.shrink(maxSize - itemstack.getCount());
-                        itemstack.setCount(maxSize);
-                        slot.putStack(itemstack);
-                        flag = true;
-                    }
-                }
-                if (reverseDirection) {
-                    --i;
-                } else {
-                    ++i;
-                }
-            }
-        }
-        if (!stack.isEmpty()) {
-            if (reverseDirection) {
-                i = endIndex - 1;
-            } else {
-                i = startIndex;
-            }
-            while (true) {
-                if (reverseDirection) {
-                    if (i < startIndex) {
-                        break;
-                    }
-                } else if (i >= endIndex) {
-                    break;
-                }
-                Slot slot1 = this.inventorySlots.get(i);
-                ItemStack itemstack1 = slot1.getStack();
-                if (itemstack1.isEmpty() && slot1.isItemValid(stack)) {
-                    if (stack.getCount() > slot1.getSlotStackLimit()) {
-                        slot1.putStack(stack.splitStack(slot1.getSlotStackLimit()));
-                    } else {
-                        slot1.putStack(stack.splitStack(stack.getCount()));
-                    }
-                    slot1.onSlotChanged();
-                    flag = true;
-                    break;
-                }
-                if (reverseDirection) {
-                    --i;
-                } else {
-                    ++i;
-                }
-            }
-        }
-        return flag;
-    }
-
-    @Override
-    @ParametersAreNonnullByDefault
     public void onContainerClosed(EntityPlayer playerIn) {
         this.internalInventory.clear();
-    }
-
-    @Override
-    public ItemStack slotClick(int slotId, int dragType, ClickType clickTypeIn, EntityPlayer player) {
-        return super.slotClick(slotId, dragType, clickTypeIn, player);
     }
 }
