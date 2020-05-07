@@ -1,6 +1,10 @@
 # Banner mod
 
-A simple mod making it easier to create your own banners.
+A simple mod making it easy to get banners with characters on them and some more.
+
+If you have a question, ideas on how to improve the mod or wish to propose a new feature, create an [Issue](https://github.com/kid2407/BannerMod/issues/new) or a [Pull request](https://github.com/kid2407/BannerMod/issues/compare).
+
+For a list of planned/upcoming features, take a look at the [Roadmap](https://github.com/kid2407/BannerMod/projects/1).
 
 ## Installation
 
@@ -12,8 +16,9 @@ If you want to run this on a server, you only need to install the mod there, peo
 You can choose the language the mod runs in by setting the appropiate language in bannermod.cfg. Currently, the following languages are supported:
 * English (en_us)
 * German (de_de)
+* Spanish (es_es)
 
-If you want to add support for another language, take a look at TranslationHelper#init() to see how translations are added and create a pull request.
+If you want to add support for another language, take a look at `TranslationHelper#init()` to see how translations are added and create a pull request.
 
 ### Permission
 
@@ -44,10 +49,12 @@ This will give you banners in the default colors for the characters **W**, **A**
 
 #### Different colors
 
+Colors can be expressed in two ways: As color codes (See the [Minecraft Wiki](https://minecraft.gamepedia.com/Banner#Pattern_color) for more information) or via color names, as shown below:
 ```
 /banner word Wallmart 14 15
+/banner word Wallmart red black
 ```
-This will give you the same banners as with the last command, except now the base color is black and the text color is red. For a list of color codes, see the relevant entry in the [Minecraft wiki](https://minecraft.gamepedia.com/Banner#Pattern_color).
+This will give you the same banners as with the last command, except now the base color is black and the text color is red.
 
 ### Special
 
